@@ -6,19 +6,27 @@ from difflib import SequenceMatcher
 drive_paths = ["/mnt/server/OneTouch/Media/Anime",
                 "/mnt/server/TwoTouch/Media/Anime",
                "/mnt/server/ThreeTouch/Media/Anime"]
-
+user_tags = ["[Erai-raws] ", "[DKB] ", "[EMBER] ", "[killer neuron] "]
+end_tags= ["[1080p][Multiple Subtitle]","[AMZN 1080p]", "[1080p][HEVC x265 10bit][Multi-Subs]"]
+extra_tags = ["- Isekai Ittara Honki Dasu Part 2"]
 
 def main():
 
     for drives in drive_paths:
         new_episodes_files = os.listdir('../')
         new_episodes_files.remove("pythonProject")
-        new_episodes_no_user = [s.replace("[Erai-raws] ", "") for s in new_episodes_files]
-        new_episodes = [s.replace("[1080p][Multiple Subtitle]", "") for s in new_episodes_no_user]
         shows = os.listdir(drives)
         #print(f"{new_episodes} \n{shows}")
         for episode_file in new_episodes_files:
-            episode_no_user = episode_file.replace("[Erai-raws] ", "")
+            episode_no_user = episode_file
+            for tag in extra_tags:
+                episode_no_user = episode_no_user.replace(tag, "")
+
+
+            episode_no_user = re.sub("- ([0-9]+)", "", episode_no_user)
+            episode_no_user = re.sub("\[[a-z,A-Z,0-9, ,-]*\]", "", episode_no_user);
+            episode_no_user = episode_no_user.replace(".mkv", "")
+
             episodes = episode_no_user.replace("[1080p][Multiple Subtitle]", "")
 
             most_similar = ""
@@ -44,7 +52,7 @@ def main():
                     print(f"../{episode_file} -> {drives}/{most_similar}/{season_folder}{episode_file}")
                     shutil.move(f"../{episode_file}", f"{drives}/{most_similar}/{season_folder}{episode_file}")
                     print("Moved\n")
-            #print(f"{rating}: {episodes} -> NULL")
+            print(f"{rating}: {episodes} -> {episode_no_user} -> {most_similar}")
 
 
 def extract_number(f):
